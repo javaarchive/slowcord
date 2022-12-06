@@ -240,6 +240,17 @@ export class User extends BaseClass {
 						code: "DISCRIMINATOR_INVALID",
 					},
 				});
+			if (
+				typeof discrim === 'number' &&
+				!Number.isNaN(discrim) &&
+				!Number.isInteger(discrim)
+				)
+					throw FieldErrors({
+						discriminator: {
+							message: "Discriminator must be a number.",
+							code: "DISCRIMINATOR_INVALID",
+						},
+					});
 			this.discriminator = discrim.toString().padStart(4, "0");
 		}
 
