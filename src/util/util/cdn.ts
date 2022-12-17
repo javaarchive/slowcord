@@ -17,7 +17,7 @@ export async function uploadFile(
 	});
 
 	const response = await fetch(
-		`${Config.get().cdn.endpointPrivate || "http://localhost:3003"}${path}`,
+		`${Config.get().cdn.endpointPrivate || process.env.CDN || process.env.SLOWCORD_CDN_PRIVATE || "http://localhost:3003"}${path}`,
 		{
 			headers: {
 				signature: Config.get().security.requestSignature,
