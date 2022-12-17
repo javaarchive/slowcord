@@ -5,15 +5,24 @@ const https = require('https');
 const fs = require("fs/promises");
 const { existsSync } = require("fs");
 
+// Currently we don't connect to the database in this script so configuration specifacation right now is done via env or .env file
+// env vars are prefixed with SLOWCORD to avoid conflicts
+require("dotenv").config({
+	path: path.join(__dirname, "..", ".env"), // use .env in root directory
+}); 
+
 // https://stackoverflow.com/a/62500224
 const httpAgent = new http.Agent({ keepAlive: true });
 const httpsAgent = new https.Agent({ keepAlive: true });
 const agent = (_parsedURL) => _parsedURL.protocol == 'http:' ? httpAgent : httpsAgent;
 
 const CACHE_PATH = path.join(__dirname, "..", "assets", "cache");
-const BASE_URL = "https://discord.com";
+const BASE_URL = process.env.SLOWCORD_BASE_URL || "https://discord.com"; // canary or ptb?
 
-const INSTANCE_NAME = "Slowcord";
+const INSTANCE_NAME = process.env.SLOWCORD_BRAND || "Slowcord";
+
+const INSTANCE_BASE_URL = process.env.SLOWCORD_BASE_URL || "https://slowcord.understars.dev";
+const INSTANCE_STATUS_URL = process.env.SLOWCORD_STATUS_URL || "https://status.slowcord.understars.dev";
 
 // Manual for now
 const INDEX_SCRIPTS = [
@@ -75,7 +84,7 @@ const doPatch = (content) => {
 	content = content.replaceAll('Servers in the Hub are student-run, but may include non-students."', 'Guilds in the Hub are student-run, but may include non-students."');
 
 	// sentry
-	content = content.replaceAll("https://fa97a90475514c03a42f80cd36d147c4@sentry.io/140984", "https://05e8e3d005f34b7d97e920ae5870a5e5@sentry.thearcanebrony.net/6");
+	content = content.replaceAll("https://fa97a90475514c03a42f80cd36d147c4@sentry.io/140984", process.env.SLOWCORD_SENTRY || "https://05e8e3d005f34b7d97e920ae5870a5e5@sentry.thearcanebrony.net/6");
 
 	//logos
 	content = content.replaceAll(
@@ -97,12 +106,12 @@ const doPatch = (content) => {
 	// app download links
 	content = content.replaceAll(
 		"https://play.google.com/store/apps/details?id=com.discord",
-		"https://slowcord.understars.dev/api/download?platform=android",
+		INSTANCE_BASE_URL + "/api/download?platform=android",
 	);
 
 	content = content.replaceAll(
 		"https://itunes.apple.com/app/discord/id985746746",
-		"https://slowcord.understars.dev/api/download?platform=ios"
+		INSTANCE_BASE_URL + "/api/download?platform=ios"
 	);
 
 	// TODO change public test build link
@@ -111,8 +120,10 @@ const doPatch = (content) => {
 	//	""
 	// )
 
-	content = content.replaceAll("status.discord.com", "status.understars.dev");
-	content = content.replaceAll("discordstatus.com", "status.understars.dev");
+	let statusUrlObject = new URL(INSTANCE_STATUS_URL);
+
+	content = content.replaceAll("status.discord.com", statusUrlObject.host);
+	content = content.replaceAll("discordstatus.com", statusUrlObject.host);
 
 	content = content.replaceAll(
 		"delete window.localStorage",
