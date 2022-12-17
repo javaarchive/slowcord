@@ -71,8 +71,8 @@ Now, generate an SSL cert with certbot:
 ```sh
 certbot --nginx
 ```
-It'll ask you a bunch of questions, generate a cert, and edit your config to match.
-You may need to run `sudo systemctl restart nginx`.
+It'll ask you a bunch of questions, generate a cert, and edit your config to match. Afterwards run a `sudo nginx -t` to check you haven't typoed. 
+You may need to run `sudo systemctl restart nginx`. If nginx is already running you can also do `sudo nginx -s reload` to reload config without a full restart. 
 
 At this point, you can probably start Slowcord using `npm run start` in the project root.
 
